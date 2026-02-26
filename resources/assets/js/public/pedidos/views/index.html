@@ -1,0 +1,157 @@
+<ui-view>
+    <div class='row'>
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div ng-if="vm.puntosEntrega.length > 0" class='pull-right'>
+                <a ui-sref='app.pedidos.create' class='btn btn-primary'><i class='fa fa-plus'></i> Realizar pedido</a>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class='row'>
+
+        <article class="col-sm-12 col-md-12 col-lg-12">
+
+            <!-- sin puntos de entrega -->
+            <div ng-if="vm.puntosEntrega.length == 0" class="alert alert-warning">
+                <i class="fa-fw fa fa-warning"></i>
+                <strong>Alerta:</strong> Actualmente no tiene asociados puntos de entrega por lo que no puedes efectuar pedidos.
+            </div>
+
+            <!-- puntos entrega -->
+            <div ng-if="vm.puntosEntrega.length > 0" class="jarviswidget" id="puntos-entrega-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-map-marker"></i> </span>
+                    <h2>Punto de Entrega</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+
+                        <!-- seleccionar punto de entrega -->
+                        <form >
+                            <fieldset ng-disabled="vm.puntosEntrega.length == 1">
+                                <legend>Punto de entrega</legend>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <ui-select ng-model="vm.puntoEntregaId" ng-change="vm.cargaPedidos()">
+                                            <ui-select-match placeholder="Seleccione punto de entrega...">
+                                                {{$select.selected.tipo}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="punto.id as punto in (vm.puntosEntrega | filter: $select.search) track by $index">
+                                                <span ng-bind="punto.tipo"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+
+                                        <p class="note" ng-show="vm.loadingPedidos">
+                                            <i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                            Cargando pedidos ...
+                                        </p>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- pedidos -->
+            <div ng-if="vm.puntoEntregaId && ! vm.loadingPedidos" class="jarviswidget" id="pedidos-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-truck"></i> </span>
+                    <h2>Pedidos</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+
+                        <!-- sin pedidos -->
+                        <div ng-if="vm.puntoEntregaId && ! vm.loadingPedidos && vm.pedidos.length == 0" class="alert alert-warning">
+                            <i class="fa-fw fa fa-warning"></i>
+                            Sin solicitudes en curso
+                        </div>
+
+                        <!-- detalle pedido -->
+                        <div class="table-responsive">
+                            <table  ng-if="vm.pedidos.length > 0" class='table table-bordered'>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th style='width:50px'>Numero</th>
+                                        <th>Fecha pedido</th>
+                                        <th>Estado</th>
+                                        <th>Detalle</th>
+                                        <th>Historial</th>
+                                        <th ng-if="vm.columnaAcciones">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="pedido in vm.pedidos track by $index">
+                                        <td>{{ ::pedido.id }}</td>
+                                        <td>{{ vm.pedidos.length - $index }}</td>
+                                        <td>{{ ::vm.formatDate(pedido.created_at) | date:'dd/MM/yyyy' }} ({{ ::pedido.diff }})</td>
+                                        <td>
+                                            <span class="label label-{{ vm.classEstados[pedido.estado]}}">
+                                                {{ pedido.estado.split('_').join(" ") }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <table class='table table-bordered'>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Producto</th>
+                                                        <th>Cajas</th>
+                                                        <th>Unidades</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="detalle in pedido.detalle">
+                                                        <td>{{ ::vm.productoNombreDetalle(detalle) }}</td>
+                                                        <td>
+                                                            <span class="badge bg-color-greenLight"> {{ ::detalle.cantidad}} </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-color-darken"> {{ ::vm.productoCajasDetalle(detalle) }} </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                        <td>
+                                            <!-- historial -->
+                                            <table class='table table-bordered'>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Estado</th>
+                                                        <th>Fecha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="historial in pedido.historial | orderBy:'-'">
+                                                        <td>{{ ::historial.estado.split('_').join(" ") }}</td>
+                                                        <td>{{ ::vm.formatDate(historial.fecha) | date:'dd/MM/yyyy' }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                        <td>
+                                            <div ng-if="pedido.estado=='en_punto_destino'">
+                                                <a class='btn btn-primary btn-xs btn-block' href="/guias/{{pedido.guia}}" title="Descargar guia de despacho" target="_blank"><i class='fa fa-cloud-download'></i> Guia despacho</a>
+                                                <a ng-if="!pedido.evaluacion" ui-sref="app.pedidos.rate({id: pedido.id})" class="btn btn-warning btn-xs btn-block"><i class='fa fa-thumbs-o-up'></i> Evaluar</a>
+                                                <input-stars class='table-stars' ng-if="pedido.evaluacion" max="7" ng-model="pedido.evaluacion" readonly></input-stars>
+                                                <hr>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </article>
+    </div>
+</ui-view>

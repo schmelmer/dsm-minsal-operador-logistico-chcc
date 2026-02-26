@@ -1,0 +1,115 @@
+<ui-view>
+    <div class='row'>
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class='pull-right'>
+				<a class="btn btn-success" href="/productos/xls"><span><i class='fa fa-file-excel-o'></i> Exportar a excel</span></a>
+                <a ui-sref='app.productos.create' ng-hide="vm.hasRole('admin')" class='btn btn-primary'>Nuevo Producto</a>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class='row'>
+        <article class="col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget jarviswidget-color-blueDark" id="users-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                    <h2>Listado de productos</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+                        <table class='table table-bordered'>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Stock</th>
+                                    <th>Unidades por Cajas</th>
+                                    <th>Categoria</th>
+                                    <th>Población</th>
+                                    <th>Año</th>
+                                    <th>Aplica solo a Servicio y Seremi</th>
+                                    <th>Aplica solo a Hospitales</th>
+                                    <th>Activo</th>
+                                    <th ng-hide="vm.hasRole('admin')" style="width:100px">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td> <input ng-model="vm.search.name" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="nombre"></input> </td>
+                                    <td> <input ng-model="vm.search.stock" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="unidades"></input> </td>
+                                    <td> <input ng-model="vm.search.cajas" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="cajas"></input> </td>
+                                    <td> <input ng-model="vm.search.categoria" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="categoria"></input> </td>
+                                    <td> <input ng-model="vm.search.poblacion" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="población"></input> </td>
+                                    <td> <input ng-model="vm.search.year" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="año"></input> </td>
+                                    <td>
+                                        <ui-select ng-model="vm.search.seremi" on-select="vm.filter()">
+                                            <ui-select-match placeholder="Selecciona">
+                                                {{$select.selected.value}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="opcion.id as opcion in vm.opcionesBooleanas">
+                                                <span ng-bind="opcion.value"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </td>
+                                    <td>
+                                        <ui-select ng-model="vm.search.hospitales" on-select="vm.filter()">
+                                            <ui-select-match placeholder="Selecciona">
+                                                {{$select.selected.value}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="opcion.id as opcion in vm.opcionesBooleanas">
+                                                <span ng-bind="opcion.value"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </td>
+                                    <td>
+                                        <ui-select ng-model="vm.search.estado" on-select="vm.filter()">
+                                            <ui-select-match placeholder="Selecciona">
+                                                {{$select.selected.value}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="opcion.id as opcion in vm.opcionesBooleanas">
+                                                <span ng-bind="opcion.value"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </td>
+                                    <td ng-hide="vm.hasRole('admin')"></td>
+                                </tr>
+                                <tr ng-repeat="producto in vm.productos" ng-hide="vm.reload">
+                                    <td>{{ ::producto.name }}</td>
+                                    <td>{{ ::producto.stock }} unidades <span class='badge bg-color-darken'>({{ ::producto.stock_cajas }} cajas)</span></td>
+                                    <td>{{ ::producto.cajas }}</td>
+                                    <td>{{ ::producto.categoria.name }}</td>
+                                    <td>{{ ::producto.poblacion.name }}</td>
+                                    <td>{{ ::producto.year }}</td>
+                                    <td><span class='label label-{{ ::producto.de_servicios ? "primary" : "default" }}'>{{ ::producto.de_servicios ? 'Si' : 'No' }}</span></td>
+                                    <td><span class='label label-{{ ::producto.de_hospitales ? "primary" : "default" }}'>{{ ::producto.de_hospitales ? 'Si' : 'No' }}</span></td>
+                                    <td><span class='label label-{{ ::producto.estado ? "success" : "default" }}'>{{ ::producto.estado ? 'Si' : 'No' }}</span></td>
+                                    <td ng-hide="vm.hasRole('admin')">
+                                        <a ng-if="producto.de_servicios" ui-sref="app.productos.deServicios({id: producto.id})" class="btn btn-primary btn-xs"><i class="fa fa-calculator"></i></a>
+                                        <a ng-if="producto.de_hospitales" ui-sref="app.productos.deHospitales({id: producto.id})" class="btn btn-primary btn-xs"><i class="fa fa-calculator"></i></a>
+                                        <a ui-sref="app.productos.edit({id: producto.id})" class="btn btn-warning btn-xs"><i class='fa fa-pencil'></i></a>
+                                        <a ng-click="vm.destroy(producto.id, $index)" class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div ng-if='vm.reload' class='text-center'>
+                            <i class="fa fa-2x fa-spinner fa-spin"></i>
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="vm.productos | isEmpty" class='text-center'>
+                            Sin resultados
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="! (vm.productos | isEmpty)" class='text-center'>
+                            <ul uib-pagination items-per-page="vm.itemsPerPage" max-size="10" boundary-link-numbers="true" rotate="false" force-ellipses="true" total-items="vm.totalItems" ng-model="vm.page" ng-change="vm.filter(vm.page)"></ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</ui-view>

@@ -1,0 +1,87 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa" ng-class="{'fa-plus': vm.action == 'Crear', 'fa-edit': vm.action == 'Editar'}"></i> </span>
+                <h2>{{ vm.action }} Estimacino</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <form class="form-horizontal" role="form" method="POST" novalidate>
+
+                        <!-- punto entrega -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('punto_entrega_id')}">
+                            <label class="col-md-4 control-label">Punto de entrega</label>
+
+                            <div class="col-md-6">
+                                <ui-select ng-model="vm.data.punto_entrega_id">
+                                    <ui-select-match placeholder="Seleccione punto de entrega">{{$select.selected.name }}</ui-select-match>
+                                    <ui-select-choices repeat="puntoEntrega.id as puntoEntrega in (vm.puntosEntrega | filter: $select.search) track by $index">
+                                        <div ng-bind-html="puntoEntrega.calle | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+
+                                <span ng-if="vm.hasError('punto_entrega_id')" class="help-block">
+                                    <strong>{{ vm.errors.punto_entrega_id[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- productos -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('producto_id')}">
+                            <label class="col-md-4 control-label">Producto</label>
+
+                            <div class="col-md-6">
+                                <ui-select ng-model="vm.data.producto_id">
+                                    <ui-select-match placeholder="No aplica">{{$select.selected.name }}</ui-select-match>
+                                    <ui-select-choices repeat="producto.id as producto in (vm.productos | filter: $select.search) track by $index">
+                                        <div ng-bind-html="producto.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+
+                                <span ng-if="vm.hasError('producto_id')" class="help-block">
+                                    <strong>{{ vm.errors.producto_id[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- valor -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('valor')}">
+                            <label class="col-md-4 control-label">Valor</label>
+
+                            <div class="col-md-6">
+                                <input type="number" min="0" class="form-control" ng-model="vm.data.valor">
+
+                                <span ng-if="vm.hasError('valor')" class="help-block">
+                                    <strong>{{ vm.errors.valor[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- total -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('total')}">
+                            <label class="col-md-4 control-label">Total</label>
+
+                            <div class="col-md-6">
+                                <input type="number" min="0" class="form-control" ng-model="vm.data.total">
+
+                                <span ng-if="vm.hasError('total')" class="help-block">
+                                    <strong>{{ vm.errors.total[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-click="vm.submitForm()" class="btn btn-primary">
+                                    <i ng-class="{'fa-user': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> {{ vm.action }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

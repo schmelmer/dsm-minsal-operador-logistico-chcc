@@ -1,0 +1,35 @@
+<ui-view>
+    <div class='row'>
+        <article class="col-sm-12 col-md-12 col-lg-12">
+
+            <!-- puntos entrega -->
+            <div class="jarviswidget" id="puntos-entrega-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-cubes"></i> </span>
+                    <h2>Puntos de entrega</h2>
+
+                    <div class="widget-toolbar" role="menu">
+
+                        <div class="btn-group">
+                            <button class="btn dropdown-toggle btn-xs btn-success" data-toggle="dropdown" aria-expanded="false">
+                                {{ vm.tipo}} <i class="fa fa-caret-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-right js-status-update">
+                                <li ng-repeat="tipo in ::vm.tipos" >
+                                    <a ng-click="vm.filter(tipo)"><i class="fa"></i> {{ tipo.value }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="widget-body">
+                    <div class='table-responsive'>
+                        <table  datatable="" dt-options="vm.dtOptions" dt-columns="vm.dtColumns" dt-instance="vm.dtInstance" class="table table-striped table-bordered table-hover" width="100%"  style="display: block; overflow-x: auto; white-space: nowrap;">
+                        </table>
+                    </div>
+            </div>
+        </article>
+    </div>
+</ui-view>
+

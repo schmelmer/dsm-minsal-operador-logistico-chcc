@@ -1,0 +1,64 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="solicitud-form">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-edit"></i> </span>
+                <h2>Actualizar pedido</h2>
+            </header>
+
+			<div class="widget-body">
+
+                <!-- punto entrega -->
+                <div>
+                    <form class='form'>
+                        <fieldset>
+                            <legend>Punto de entrega: {{ ::vm.puntoEntrega.tipo }}</legend>
+                        </fieldset>
+
+                        <!-- mapa -->
+                        <div class='row'>
+                            <div class='col-md-6 col-md-offset-3'>
+                                <i class='fa fa-globe'> </i> <strong>Direccion:</strong> {{ ::vm.puntoEntrega.direccion }}
+                                <ng-map ng-show="vm.showMap" zoom="17" center="{{ vm.puntoEntrega.direccion }}, {{vm.puntoEntrega.region.name}}, Chile" style="height:90%" >
+                                    <shape name="circle"
+                                        stroke-color="#FF0000"
+                                        stroke-opacity="0.8"
+                                        stroke-weight="2"
+                                        fill-color="#FF0000"
+                                        fill-opacity="0.35"
+                                        center="{{ vm.puntoEntrega.direccion }}, {{vm.puntoEntrega.region.name}}, Chile"
+                                        radius="10">
+                                    </shape>
+                                </ng-map>
+                            </div>
+                        </div>
+
+						<!-- cambiar estado -->
+						<nav>
+							<ol class="cd-multi-steps text-center">
+                                <li class="visited"><a ng-click="vm.actualizaEstado('solicitud_realizada')"><i class='fa fa-cubes'></i> Solicitud enviada</a></li>
+								<li ng-class="{visited:  vm.paso > 1 && vm.paso <= 3}"><a ng-click="vm.actualizaEstado('en_transito')" style="{{ vm.data.estado =='solicitud_realizada' ? 'cursor:pointer' : ''}}"><i class='fa fa-truck'></i> En transito</a></li>
+                                <li ng-class="{visited:  vm.paso == 3}">
+                                    <a ng-click="vm.actualizaEstado('en_punto_destino')" style="{{ vm.data.estado =='en_transito' || vm.data.estado == 'en_punto_destino' ? 'cursor:pointer' : ''}}"><i class='fa fa-map-marker'></i> En punto de destino</a>
+                                </li>
+							</ol>
+						</nav>
+
+                        <div ng-if="vm.data.estado== 'en_punto_destino'" class="form-group">
+                            <label class="col-md-4 control-label" for="singlebutton"></label>
+                            <div class="col-md-4 center-block">
+                                <button class="btn btn-default btn-sm center-block">
+                                    <a href="/guias/{{vm.data.guia}}" target="_blank"><i class='fa fa-cloud-download'></i> Descargar guia de despacho</a>
+                                </button>
+                            </div>
+                        </div>
+                        <br>
+                        <hr>
+                        <div ng-if="(vm.data.estado == 'en_transito' && vm.paso == 2) || vm.data.estado == 'en_punto_destino' && vm.paso == 3" id='dropzone' class="dropzone" options="vm.dzOptions" callbacks="vm.dzCallbacks" methods="vm.dzMethods" ng-dropzone></div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>

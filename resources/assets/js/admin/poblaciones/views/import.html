@@ -1,0 +1,85 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="import-form">
+            <header>
+                <span class="widget-icon"> <i class="fa" ng-class="{'fa-plus': vm.action == 'Crear', 'fa-edit': vm.action == 'Editar'}"></i> </span>
+                <h2>{{ vm.action }} Población</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <form class="form-horizontal" role="form" method="POST" novalidate>
+
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('file')}">
+                            <label class="col-md-4 control-label"></label>
+
+                            <div class="col-md-6">
+                                <js-xls onload="load" onread="read" onerror="error"></js-xls>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-if="vm.loading">
+                            <div class="col-md-6 col-md-offset-4">
+                                <i class="fa fa-spinner fa-spin"></i> Cargando ...
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-danger fade in" ng-if="vm.errorMessage">
+                        <button class="close" data-dismiss="alert"> × </button>
+                        <i class="fa-fw fa fa-times"></i> <strong>Error al leer el archivo!</strong>
+                        <p>{{ vm.errorMessage }}</p>
+                    </div>
+
+                    <div class="alert alert-danger fade in" ng-if="vm.notFound && vm.notFound.length > 0">
+                        <button class="close" data-dismiss="alert"> × </button>
+                        <i class="fa-fw fa fa-times"></i> <strong>Error!</strong> No existen los siguientes establecimientos
+                    </div>
+
+                    <table class='table table-bordered' ng-if="vm.notFound && vm.notFound.length > 0">
+                        <tbody>
+                            <thead>
+                                <tr class="danger">
+                                    <th>Fila</th>
+                                    <th>Nombre</th>
+                                    <th>Codigo</th>
+                                </tr>
+                            </thead>
+                            <tr ng-repeat="e in vm.notFound">
+                                <td>{{ e.__rowNum__ + 1}}</td>
+                                <td>{{ e.Nombre}}</td>
+                                <td>{{ e.Codigo}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-info fade in" ng-if="vm.data.length > 0 && ! vm.notFound">
+                        <button class="close" data-dismiss="alert"> × </button>
+                        <i class="fa-fw fa fa-times"></i> <strong>Carga existosa!</strong> Contenido
+                    </div>
+
+                    <table class='table table-bordered' ng-hide="vm.notFound || vm.data.length == 0">
+                        <tbody>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Comuna</th>
+                                    <th>Servicio</th>
+                                    <th>Nombre</th>
+                                    <th>Codigo</th>
+                                </tr>
+                            </thead>
+                            <tr ng-repeat="poblacion in vm.data">
+                                <td>{{ $index}}</td>
+                                <td>{{ ::poblacion.Comuna}}</td>
+                                <td>{{ ::poblacion.Servicio}}</td>
+                                <td>{{ ::poblacion.Nombre}}</td>
+                                <td>{{ ::poblacion.Codigo}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

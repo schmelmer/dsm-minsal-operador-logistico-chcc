@@ -1,0 +1,70 @@
+<ui-view>
+    <div class="row">
+        <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa-fw fa fa-home"></i>
+                Home
+            </h1>
+		</div>
+	</div>
+
+	<section class="">
+		<div class="row">
+			<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+                <div class="jarviswidget" ng-repeat="data in vm.data">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-map-marker"></i> </span>
+                        <h2>{{ data.punto }}</h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                            <input class="form-control" type="text">
+                        </div>
+                        <div class="widget-body">
+
+                            <!-- estadisticas globales -->
+                            <div class='row'>
+                                <div class="col-sm-9 col-md-9 col-lg-8">
+                                    <ul id="sparks" class="">
+                                        <li class="sparks-info">
+                                            <h5> Cantidad de pedidos: <span class="txt-color-purple text-right"><i class="fa fa-truck"></i>&nbsp;{{ data.cantidadPedidos}}</span></h5>
+                                        </li>
+                                        <li class="sparks-info">
+                                            <h5 ng-if="data.ultimoPedido"> último pedido realizado:<span class="txt-color-greenDark"><i class="fa fa-calendar"></i>&nbsp; {{ data.ultimoPedido }}</span></h5>
+                                            <h5 ng-if="!data.ultimoPedido"  class="txt-color-red"> No ha realizado ningun pedido<span class='txt-color-red'><i class="fa fa-warning"></i>&nbsp; </span></h5>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- estadisticas productos -->
+                            <div class="row">
+
+                                <div ng-repeat="producto in data.productos" easy-pie-chart-container percent="producto.porcentaje" color="'txt-color-' +vm.getColor(producto.name)">
+                                    <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11"> <span class="text"> {{ producto.name }}<span class="pull-right">{{ producto.cajasPedidas }} / {{ producto.cajasTotal }} cajas</span> </span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-color-{{::vm.getColor(producto.name)}}" ng-style="{ 'width': producto.porcentaje + '%' }"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" style="padding-top: 10px;">
+                                        <div class="easy-pie-chart " data-pie-size="50" >
+                                            <span class="percent percent-sign ">{{ producto.porcentaje }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+			</article>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+			</div>
+		</div>
+	</section>
+</ui-view>

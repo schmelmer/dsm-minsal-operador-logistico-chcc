@@ -1,0 +1,100 @@
+<ui-view>
+
+    <div class='row'>
+        <article class="col-sm-12 col-md-12 col-lg-12">
+
+            <!-- año -->
+            <div class="jarviswidget jarviswidget-color-blueDark" id="agno-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-calendar-o"></i> </span>
+                    <h2>Año actual</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+
+                        <!-- actualizar agno -->
+                        <form class="form-horizontal" role="form" method="POST" novalidate>
+                            <fieldset ng-disabled="vm.hasRole('admin')">
+                            <div class="form-group" ng-class="{'has-error': vm.hasError('agno')}">
+                                <label class="col-md-4 control-label">Año actual</label>
+
+                                <div class="col-md-6">
+                                    <ui-select ng-model="vm.data.agno">
+                                        <ui-select-match placeholder="Seleccione año...">
+                                            {{$select.selected}}
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="agno in (vm.agnos | filter: $select.search) track by $index">
+                                            <span ng-bind="agno"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+
+                                    <span ng-if="vm.hasError('agno')" class="help-block">
+                                        <strong>{{ vm.errors.agno[0] }}</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-6 col-md-offset-4">
+                                    <button ng-click="vm.submitForm()" class="btn btn-primary">
+                                        <i ng-class="{'fa-edit': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> Editar
+                                    </button>
+                                </div>
+                            </div>
+                        </fieldset>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- empresa distrubuidora actual -->
+            <div class="jarviswidget jarviswidget-color-blueDark" id="agno-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-ship"></i> </span>
+                    <h2>Empresa distribuidora actual</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+
+                        <!-- actualizar empresa -->
+                        <form class="form-horizontal" role="form" novalidate>
+                            <fieldset ng-disabled="vm.hasRole('admin')">
+
+                            <div class="form-group" ng-class="{'has-error': vm.hasError('distribuidor')}">
+                                <label class="col-md-4 control-label">Año actual</label>
+
+                                <div class="col-md-6">
+
+                                    <ui-select ng-model="vm.data.distribuidor">
+                                        <ui-select-match placeholder="Seleccione distribuidor ...">
+                                            {{$select.selected.name}} - ({{$select.selected.email}})
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="distribuidor.id as distribuidor in (vm.distribuidores | filter: $select.search) track by $index">
+                                            <span ng-bind="distribuidor.name"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+
+                                    <span ng-if="vm.hasError('distribuidor')" class="help-block">
+                                        <strong>{{ vm.errors.distribuidor[0] }}</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-6 col-md-offset-4">
+                                    <button ng-click="vm.submitDistribuidorForm()" class="btn btn-primary">
+                                        <i ng-class="{'fa-edit': !vm.formDistribuidorIsSubmit, 'fa-spinner fa-spin': vm.formDistribuidorIsSubmit }" class="fa fa-btn "></i> Editar
+                                    </button>
+                                </div>
+                            </div>
+                        </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</ui-view>

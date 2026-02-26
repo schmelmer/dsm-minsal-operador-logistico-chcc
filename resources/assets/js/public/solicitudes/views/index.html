@@ -1,0 +1,715 @@
+<style>
+.sweet-alert p {
+    font-size: 14px;
+}
+</style>
+<ui-view>
+    <div class='row'>
+
+        <article class="col-sm-12 col-md-12 col-lg-12">
+
+            <!-- pedidos -->
+            <div class="" id="solicitudes-table">
+                <header>
+                    <h2>Solicitudes</h2>
+                </header>
+
+                    <div class="">
+
+						<div class="tabs">
+							<input type="radio" name="tabs" id="tabSolicitudRealizada" ng-checked="true">
+							<label for='tabSolicitudRealizada'>
+								<i class="fa fa-cubes"></i><span>Solicitud realizada</span>
+							</label>
+
+							<input type="radio" name="tabs" id="tabEnTransito" ng-checked="false">
+							<label for='tabEnTransito'>
+								<i class="fa fa-truck"></i><span>En Transito</span>
+							</label>
+
+							<input type="radio" name="tabs" id="tabPuntoDestino" ng-checked="false">
+							<label for='tabPuntoDestino'>
+								<i class="fa fa-map-marker"></i><span>En punto destino</span>
+							</label>
+
+							<!-- solicitud realizada -->
+							<div id="tab-contentSolicitudRealizada" class="tab-content">
+
+								<!-- sin solicitudes -->
+								<div ng-if="vm.solicitudesRealizadas.length == 0" class="alert alert-warning">
+									<i class="fa-fw fa fa-warning"></i>
+									Sin solicitudes en curso
+								</div>
+
+                                <div class="table-responsive">
+
+                                    <table  ng-if="vm.solicitudesRealizadas.length > 0" class='table table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Punto</th>
+                                                <th>Fecha pedido</th>
+                                                <th>Estado</th>
+                                                <th style="width:215px">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="solicitud in vm.solicitudesRealizadas track by $index">
+                                                <td>{{ solicitud.folio }}</td>
+                                                <td>{{ solicitud.puntoentrega.tipo}}</td>
+                                                <td>{{ vm.formatDate(solicitud.created_at) | date:'dd/MM/yyyy' }} ({{ solicitud.diff }})</td>
+                                                <td>
+                                                    <span class="label label-{{ vm.classEstados[solicitud.estado]}}">
+                                                        {{ solicitud.estado.split('_').join(" ") }}
+                                                    </span>
+                                                </td>
+                                                <td>
+
+                                                    <a ui-sref="app.solicitudes.edit({id: solicitud.id})" class="btn btn-warning btn-xs"><i class='fa fa-edit'></i> Editar</a>
+                                                    <button ng-click="vm.mapas[solicitud.id] = true" type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal_{{solicitud.id}}">
+                                                        <i class='fa fa-newspaper-o'></i> Detalle
+                                                    </button>
+
+                                                    <!-- Modal -->
+                                                    <div class="print-content">
+                                                        <div class="modal fade" id="myModal_{{solicitud.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                        <h4 class="modal-title" id="myModalLabel">Resumen del pedido</h4>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class='well'>
+                                                                            <ul class="list-unstyled">
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-building"></i> &nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.tipo}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-globe"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.direccion}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-user"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.name}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-phone"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.telefono}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="javascript:void(0);" class="ng-binding"> {{ solicitud.puntoentrega.responsable.email}}</a>
+                                                                                    </p>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </div>
+
+                                                                        <!-- detalle -->
+                                                                        <h3>Detalles del pedido</h3>
+                                                                        <table class='table table-bordered'>
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Producto</th>
+                                                                                    <th>Cajas</th>
+                                                                                    <th>Unidades</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="detalle in solicitud.detalle">
+                                                                                    <td>{{ vm.productoNombreDetalle(detalle) }}</td>
+                                                                                    <td>
+                                                                                        <span class="badge bg-color-greenLight"> {{ detalle.cantidad}} </span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span class="badge bg-color-darken"> {{ vm.productoCajasDetalle(detalle) }} </span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                            <tfoot ng-if="solicitud.observacion">
+                                                                                <tr>
+                                                                                    <th colspan="3" class='text-center'>Observación</th>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="3">{{ solicitud.observacion }}</td>
+                                                                                </tr>
+                                                                            </tfoot>
+                                                                        </table>
+
+                                                                        <!-- historial -->
+                                                                        <div>
+                                                                            <h3>Historial de estados</h3>
+                                                                            <table class='table table-bordered'>
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Estado</th>
+                                                                                        <th>Fecha</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    <tr ng-repeat="historial in solicitud.historial | orderBy:'-'">
+                                                                                        <td>{{ historial.estado.split('_').join(" ") }}</td>
+                                                                                        <td>{{ vm.formatDate(historial.fecha) | date:'dd/MM/yyyy' }}</td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button ng-click="vm.print(solicitud.id)" type="button" class="btn btn-default print"><i class="fa fa-file-pdf-o"></i> Generar PDF</button>
+                                                                        <button data-dismiss="modal" type="button" class="btn btn-primary">Cerrar</button>
+
+                                                                        <!-- modal detalle -->
+                                                                        <div class="print-content">
+                                                                            <div class="modal fade" id="myModal_{{solicitud.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                                                                <div class="modal-dialog" role="document">
+                                                                                    <div class="modal-content">
+                                                                                        <div class="modal-header">
+                                                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                                            <h4 class="modal-title" id="myModalLabel">Resumen del pedido</h4>
+                                                                                        </div>
+                                                                                        <div class="modal-body">
+                                                                                            <div class='well'>
+                                                                                                <ul class="list-unstyled">
+                                                                                                    <li>
+                                                                                                        <p class="text-muted">
+                                                                                                            <i class="fa fa-building"></i> &nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.tipo}}</span>
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                    <li>
+                                                                                                        <p class="text-muted">
+                                                                                                            <i class="fa fa-globe"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.direccion}}</span>
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                    <li>
+                                                                                                        <p class="text-muted">
+                                                                                                            <i class="fa fa-user"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.name}}</span>
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                    <li>
+                                                                                                        <p class="text-muted">
+                                                                                                            <i class="fa fa-phone"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.telefono}}</span>
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                    <li>
+                                                                                                        <p class="text-muted">
+                                                                                                            <i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="javascript:void(0);" class="ng-binding"> {{ solicitud.puntoentrega.responsable.email}}</a>
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                </ul>
+                                                                                            </div>
+
+                                                                                            <!-- detalle -->
+                                                                                            <h3>Detalles del pedido</h3>
+                                                                                            <table class='table table-bordered'>
+                                                                                                <thead>
+                                                                                                    <tr>
+                                                                                                        <th>Producto</th>
+                                                                                                        <th>Cajas</th>
+                                                                                                        <th>Unidades</th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <tbody>
+                                                                                                    <tr ng-repeat="detalle in solicitud.detalle">
+                                                                                                        <td>{{ vm.productoNombreDetalle(detalle) }}</td>
+                                                                                                        <td>
+                                                                                                            <span class="badge bg-color-greenLight"> {{ detalle.cantidad}} </span>
+                                                                                                        </td>
+                                                                                                        <td>
+                                                                                                            <span class="badge bg-color-darken"> {{ vm.productoCajasDetalle(detalle) }} </span>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                </tbody>
+                                                                                                <tfoot ng-if="solicitud.observacion">
+                                                                                                    <tr>
+                                                                                                        <th colspan="3" class='text-center'>Observación</th>
+                                                                                                    </tr>
+                                                                                                    <tr>
+                                                                                                        <td colspan="3">{{ solicitud.observacion }}</td>
+                                                                                                    </tr>
+                                                                                                </tfoot>
+                                                                                            </table>
+
+                                                                                            <!-- historial -->
+                                                                                            <div>
+                                                                                                <h3>Historial de estados</h3>
+                                                                                                <table class='table table-bordered'>
+                                                                                                    <thead>
+                                                                                                        <tr>
+                                                                                                            <th>Estado</th>
+                                                                                                            <th>Fecha</th>
+                                                                                                        </tr>
+                                                                                                    </thead>
+                                                                                                    <tbody>
+                                                                                                        <tr ng-repeat="historial in solicitud.historial | orderBy:'-'">
+                                                                                                            <td>{{ historial.estado.split('_').join(" ") }}</td>
+                                                                                                            <td>{{ vm.formatDate(historial.fecha) | date:'dd/MM/yyyy' }}</td>
+                                                                                                        </tr>
+                                                                                                    </tbody>
+                                                                                                </table>
+                                                                                            </div>
+
+                                                                                        </div>
+                                                                                        <div class="modal-footer">
+                                                                                            <button ng-click="vm.print(solicitud.id)" type="button" class="btn btn-default print"><i class="fa fa-file-pdf-o"></i> Generar PDF</button>
+                                                                                            <button data-dismiss="modal" type="button" class="btn btn-primary">Cerrar</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                    </div>															</div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div ng-if='vm.reload' class='text-center'>
+                                        <i class="fa fa-2x fa-spinner fa-spin"></i>
+                                    </div>
+
+                                    <div ng-hide="vm.reload" ng-if="! (vm.solicitudesRealizadas | isEmpty)" class='text-center'>
+                                        <ul
+                                            uib-pagination
+                                            items-per-page="vm.itemsPerPageRealizadas"
+                                            max-size="15"
+                                            boundary-link-numbers="true"
+                                            rotate="false"
+                                            force-ellipses="true"
+                                            total-items="vm.totalItemsRealizadas"
+                                            ng-model="vm.pageRealizadas"
+                                            ng-change="vm.filterRealizadas(vm.pageRealizadas)">
+                                        </ul>
+                                    </div>
+
+                                </div>
+							</div>
+
+							<!-- en transito -->
+							<div id="tab-contentEnTransito" class="tab-content">
+
+								<div ng-if="vm.solicitudesEnTransito.length == 0" class="alert alert-warning">
+									<i class="fa-fw fa fa-warning"></i>
+									Sin solicitudes en curso
+								</div>
+
+                                <div class="table-responsive">
+                                    <table  ng-if="vm.solicitudesEnTransito.length > 0" class='table table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Punto</th>
+                                                <th>Fecha pedido</th>
+                                                <th>Estado</th>
+                                                <th style="width:285px">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="solicitud in vm.solicitudesEnTransito track by $index">
+                                                <td>{{ solicitud.folio }}</td>
+                                                <td>{{ solicitud.puntoentrega.tipo}}</td>
+                                                <td>{{ vm.formatDate(solicitud.created_at) | date:'dd/MM/yyyy' }} ({{ solicitud.diff }})</td>
+                                                <td>
+                                                    <span class="label label-{{ vm.classEstados[solicitud.estado]}}">
+                                                        {{ solicitud.estado.split('_').join(" ") }}
+                                                    </span>
+                                                </td>
+                                                <td>
+
+                                                    <a ui-sref="app.solicitudes.edit({id: solicitud.id})" class="btn btn-warning btn-xs"><i class='fa fa-edit'></i> Editar</a>
+                                                    <button ng-click="vm.mapas[solicitud.id] = true" type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal_{{solicitud.id}}">
+                                                        <i class='fa fa-newspaper-o'></i> Detalle
+                                                    </button>
+                                                    <button style="margin-right:10px" ng-click="vm.mapas[solicitud.id] = true" type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#acta_{{solicitud.id}}">
+                                                        <i class='fa fa-newspaper-o'></i> Acta
+                                                    </button>
+
+                                                    <!-- modal acta-->
+                                                    <div class="print-content">
+                                                        <div class="modal fade" id="acta_{{solicitud.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content" id='acta_{{solicitud.id}}'>
+                                                                    <div class="modal-header">
+                                                                        <img ng-src='{{ vm.pathAssets }}img/logo_ministerio_desarrollo.jpg' style="width: 20%" />
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                        <h4 class="modal-title text-center" id="myModalLabel"><strong>Acta de entrega</strong></h4>
+                                                                        <p class='pull-right' style="margin-right: 40px;"> Folio: {{ solicitud.folio }}</p>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <p>
+                                                                            En Santiago, a {{ vm.today() }} <strong>LA DIVISIÓN DE PROMOCIÓN Y PROTECCIÓN SOCIAL</strong>, hace entrega del siguiente material:
+                                                                        </p>
+																		<br>
+
+                                                                        <table class='table table-bordered'>
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Material</th>
+                                                                                    <th>Cajas</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="detalle in solicitud.detalle">
+                                                                                    <td>{{ vm.productoNombreDetalle(detalle) }}</td>
+                                                                                    <td>
+                                                                                        <span class="badge bg-color-darken"> {{ detalle.cantidad }} </span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+
+																		<p>
+                                                                            Cabe señalar que estos materiales, deben ser entregados al/la señor/a: {{ solicitud.puntoentrega.responsable.name}}, en la siguiente dirección: <strong>{{  solicitud.puntoentrega.direccion }}, {{  solicitud.puntoentrega.comuna.name }}</strong>.
+																		</p>
+
+                                                                        <table class='table table-bordered'>
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Entrega</th>
+                                                                                    <th>Destinación - Aceptación</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>Unidad que entrega: <br><strong> Unidad de Chile Crece Contigo</strong></td>
+                                                                                    <td>Unidad de Recepción:</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Encargado despacho: <br><strong> TNT</strong></td>
+                                                                                    <td>Nombre  Funcionario que recibe:<br> <strong>{{ solicitud.puntoentrega.responsable.name}}</strong></td>
+                                                                                </tr>
+                                                                                <tr style="height: 61px">
+                                                                                    <td>Fecha envio: <br></td>
+                                                                                    <td>Fecha recepción: <br></td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                        <div style="page-break-after:always"></div>
+                                                                        <div class='well' style="height: 100px;">
+                                                                            <strong>Observaciones:</strong> {{  solicitud.observacion_distribuidor }}
+                                                                        </div>
+                                                                        <p style="margin-bottom: 30px;">
+                                                                            Declaro recepción conforme del material detallado anteriormente.
+                                                                        </p>
+
+                                                                        <br>
+                                                                        <div style="border-top: 1px solid;text-align: center; float: right; margin-right: 10px; padding: 0 10px; font-size: 13px; ">
+                                                                            <strong>  Firma receptor del envío </strong>
+                                                                        </div>
+                                                                        <br>
+
+
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button ng-click="vm.print(solicitud.id, true)" type="button" class="btn btn-default print"><i class="fa fa-file-pdf-o"></i> Generar PDF</button>
+                                                                        <button data-dismiss="modal" type="button" class="btn btn-primary">Cerrar</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+
+                                                    <!-- modal detalle -->
+                                                    <div class="print-content">
+                                                        <div class="modal fade" id="myModal_{{solicitud.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                        <h4 class="modal-title" id="myModalLabel">Resumen del pedido</h4>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class='well'>
+                                                                            <ul class="list-unstyled">
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-building"></i> &nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.tipo}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-globe"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.direccion}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-user"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.name}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-phone"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.telefono}}</span>
+                                                                                    </p>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <p class="text-muted">
+                                                                                        <i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="javascript:void(0);" class="ng-binding"> {{ solicitud.puntoentrega.responsable.email}}</a>
+                                                                                    </p>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </div>
+
+                                                                        <!-- detalle -->
+                                                                        <h3>Detalles del pedido</h3>
+                                                                        <table class='table table-bordered'>
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Producto</th>
+                                                                                    <th>Cajas</th>
+                                                                                    <th>Unidades</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="detalle in solicitud.detalle">
+                                                                                    <td>{{ vm.productoNombreDetalle(detalle) }}</td>
+                                                                                    <td>
+                                                                                        <span class="badge bg-color-greenLight"> {{ detalle.cantidad}} </span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span class="badge bg-color-darken"> {{ vm.productoCajasDetalle(detalle) }} </span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                            <tfoot ng-if="solicitud.observacion">
+                                                                                <tr>
+                                                                                    <th colspan="3" class='text-center'>Observación</th>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="3">{{ solicitud.observacion }}</td>
+                                                                                </tr>
+                                                                            </tfoot>
+                                                                        </table>
+
+                                                                        <!-- historial -->
+                                                                        <div>
+                                                                            <h3>Historial de estados</h3>
+                                                                            <table class='table table-bordered'>
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Estado</th>
+                                                                                        <th>Fecha</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    <tr ng-repeat="historial in solicitud.historial | orderBy:'-'">
+                                                                                        <td>{{ historial.estado.split('_').join(" ") }}</td>
+                                                                                        <td>{{ vm.formatDate(historial.fecha) | date:'dd/MM/yyyy' }}</td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button ng-click="vm.print(solicitud.id)" type="button" class="btn btn-default print"><i class="fa fa-file-pdf-o"></i>Generar PDF</button>
+                                                                        <button data-dismiss="modal" type="button" class="btn btn-primary">Cerrar</button>
+                                                                    </div>
+
+                                                                    <!-- modal detalle -->
+                                                                    <div class="print-content">
+                                                                        <div class="modal fade" id="myModal_{{solicitud.id}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                                                            <div class="modal-dialog" role="document">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                                        <h4 class="modal-title" id="myModalLabel">Resumen del pedido</h4>
+                                                                                    </div>
+                                                                                    <div class="modal-body">
+                                                                                        <div class='well'>
+                                                                                            <ul class="list-unstyled">
+                                                                                                <li>
+                                                                                                    <p class="text-muted">
+                                                                                                        <i class="fa fa-building"></i> &nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.tipo}}</span>
+                                                                                                    </p>
+                                                                                                </li>
+                                                                                                <li>
+                                                                                                    <p class="text-muted">
+                                                                                                        <i class="fa fa-globe"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.direccion}}</span>
+                                                                                                    </p>
+                                                                                                </li>
+                                                                                                <li>
+                                                                                                    <p class="text-muted">
+                                                                                                        <i class="fa fa-user"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.name}}</span>
+                                                                                                    </p>
+                                                                                                </li>
+                                                                                                <li>
+                                                                                                    <p class="text-muted">
+                                                                                                        <i class="fa fa-phone"></i>&nbsp;&nbsp; <span class="txt-color-darken ng-binding"> {{ solicitud.puntoentrega.responsable.telefono}}</span>
+                                                                                                    </p>
+                                                                                                </li>
+                                                                                                <li>
+                                                                                                    <p class="text-muted">
+                                                                                                        <i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="javascript:void(0);" class="ng-binding"> {{ solicitud.puntoentrega.responsable.email}}</a>
+                                                                                                    </p>
+                                                                                                </li>
+                                                                                            </ul>
+                                                                                        </div>
+
+                                                                                        <!-- detalle -->
+                                                                                        <h3>Detalles del pedido</h3>
+                                                                                        <table class='table table-bordered'>
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th>Producto</th>
+                                                                                                    <th>Cajas</th>
+                                                                                                    <th>Unidades</th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <tr ng-repeat="detalle in solicitud.detalle">
+                                                                                                    <td>{{ vm.productoNombreDetalle(detalle) }}</td>
+                                                                                                    <td>
+                                                                                                        <span class="badge bg-color-greenLight"> {{ detalle.cantidad}} </span>
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <span class="badge bg-color-darken"> {{ vm.productoCajasDetalle(detalle) }} </span>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                            <tfoot ng-if="solicitud.observacion">
+                                                                                                <tr>
+                                                                                                    <th colspan="3" class='text-center'>Observación</th>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td colspan="3">{{ solicitud.observacion }}</td>
+                                                                                                </tr>
+                                                                                            </tfoot>
+                                                                                        </table>
+
+                                                                                        <!-- historial -->
+                                                                                        <div>
+                                                                                            <h3>Historial de estados</h3>
+                                                                                            <table class='table table-bordered'>
+                                                                                                <thead>
+                                                                                                    <tr>
+                                                                                                        <th>Estado</th>
+                                                                                                        <th>Fecha</th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <tbody>
+                                                                                                    <tr ng-repeat="historial in solicitud.historial | orderBy:'-'">
+                                                                                                        <td>{{ historial.estado.split('_').join(" ") }}</td>
+                                                                                                        <td>{{ vm.formatDate(historial.fecha) | date:'dd/MM/yyyy' }}</td>
+                                                                                                    </tr>
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                    <div class="modal-footer">
+                                                                                        <button ng-click="vm.print(solicitud.id)" type="button" class="btn btn-default print"><i class="fa fa-file-pdf-o"></i>Generar PDF</button>
+                                                                                        <button data-dismiss="modal" type="button" class="btn btn-primary">Cerrar</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div ng-if='vm.reload' class='text-center'>
+                                        <i class="fa fa-2x fa-spinner fa-spin"></i>
+                                    </div>
+
+                                    <div ng-hide="vm.reload" ng-if="! (vm.solicitudesEnTransito | isEmpty)" class='text-center'>
+                                        <ul
+                                            uib-pagination
+                                            items-per-page="vm.itemsPerPageEnTransito"
+                                            max-size="15"
+                                            boundary-link-numbers="true"
+                                            rotate="false"
+                                            force-ellipses="true"
+                                            total-items="vm.totalItemsEnTransito"
+                                            ng-model="vm.pageEnTransito"
+                                            ng-change="vm.filterEnTransito(vm.pageEnTransito)">
+                                        </ul>
+                                    </div>
+                                </div>
+							</div>
+
+							<!-- punto destino -->
+							<div id="tab-contentPuntoDestino" class="tab-content">
+								<div ng-if="vm.solicitudesEnPuntoDestino.length == 0" class="alert alert-warning">
+									<i class="fa-fw fa fa-warning"></i>
+									Sin solicitudes en curso
+								</div>
+
+                                <div class="table-responsive">
+                                    <table  ng-if="vm.solicitudesEnPuntoDestino.length > 0" class='table table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Punto</th>
+                                                <th>Fecha pedido</th>
+                                                <th>Estado</th>
+                                                <th style="width:430px">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="solicitud in vm.solicitudesEnPuntoDestino track by $index">
+                                                <td>{{ solicitud.folio }}</td>
+                                                <td>{{ solicitud.puntoentrega.tipo}}</td>
+                                                <td>{{ vm.formatDate(solicitud.created_at) | date:'dd/MM/yyyy' }} ({{ solicitud.diff }})</td>
+                                                <td>
+                                                    <span class="label label-{{ vm.classEstados[solicitud.estado]}}">
+                                                        {{ solicitud.estado.split('_').join(" ") }}
+                                                    </span>
+                                                </td>
+                                                <td class=''>
+
+                                                    <a style="margin-right:10px" ui-sref="app.solicitudes.edit({id: solicitud.id})" class="btn btn-warning btn-xs"><i class='fa fa-edit'></i> Editar</a>
+                                                    <a  style="margin-right:10px" class='btn btn-primary btn-xs' href="/guias/{{solicitud.guia}}" title="Descargar guia de despacho" target="_blank"><i class='fa fa-cloud-download'></i> Guía</a>
+                                                    <a  class='btn bg-color-blueDark txt-color-white btn-xs' ui-sref="app.solicitudes.observation({id: solicitud.id})" title="Realizar observación"><i class='fa fa-exclamation-triangle'></i> Observaciones</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div ng-if='vm.reload' class='text-center'>
+                                        <i class="fa fa-2x fa-spinner fa-spin"></i>
+                                    </div>
+
+                                    <div ng-hide="vm.reload" ng-if="! (vm.solicitudesEnPuntoDestino | isEmpty)" class='text-center'>
+                                        <ul
+                                            uib-pagination
+                                            items-per-page="vm.itemsPerPageEnPuntoDestino"
+                                            max-size="15"
+                                            boundary-link-numbers="true"
+                                            rotate="false"
+                                            force-ellipses="true"
+                                            total-items="vm.totalItemsEnPuntoDestino"
+                                            ng-model="vm.pageEnPuntoDestino"
+                                            ng-change="vm.filterEnPuntoDestino(vm.pageEnPuntoDestino)">
+                                        </ul>
+                                    </div>
+
+                                </div>
+							</div>
+						</div>
+
+                    </div>
+            </div>
+        </article>
+    </div>
+</ui-view>

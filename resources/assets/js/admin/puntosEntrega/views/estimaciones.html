@@ -1,0 +1,52 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa" ng-class="{'fa-plus': vm.action == 'Crear', 'fa-edit': vm.action == 'Editar'}"></i> </span>
+                <h2>Estimaciones</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <form class="form-horizontal" name='vm.form' role="form" method="POST" novalidate>
+
+                        <fieldset ng-disabled="! vm.hasRole('super-admin')">
+                            <legend>Cajas totales en el año</legend>
+
+                            <div class="form-group" ng-repeat="estimacion in vm.estimaciones | orderBy: 'id' track by $index">
+                                <label class="col-md-4 control-label">{{ estimacion.producto.name }}</label>
+
+                                <!-- <div class="col-md-6" ng-class="{'has-error': vm.hasError('productos.' + $index + '.cantidad')}"> -->
+                                <div class="col-md-2">
+                                    <ng-form name="cantidadForm">
+                                        <input ng-model="estimacion.cajas_manuales" name='cantidad' ng-min="0" ng-value="estimacion.cajas_total" class='form-control' type="number" />
+
+                                        <!-- errores -->
+                                        <div ng-messages="cantidadForm.cantidad.$error" ng-show="cantidadForm.cantidad.$dirty && cantidadForm.cantidad.$invalid" class='has-error'>
+                                            <span ng-message="min" class='help-block text-danger'>Cantidad no puede ser menor a 0</span>
+                                            <span ng-message="required" class='help-block'>Ingrese cantidad de cajas del producto</span>
+                                        </div>
+                                    </ng-form>
+
+                                    <!-- errores servidor -->
+                                    <!-- <span ng-if="vm.hasError('productos.' + $index + '.cantidad')" class="help-block"> -->
+                                    <!--     <strong>{{ vm.errors['productos.' + $index + '.cantidad'][0]}}</strong> -->
+                                    <!-- </span> -->
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-disabled="vm.form.$invalid" class="btn btn-primary" ng-click="vm.submitForm()">
+                                    <i ng-class="{'fa-truck': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> Editar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

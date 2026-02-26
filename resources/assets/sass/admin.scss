@@ -1,0 +1,25 @@
+
+// Fonts
+@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
+
+// Variables
+@import "variables";
+
+// Bootstrap
+@import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "node_modules/font-awesome/scss/font-awesome";
+@import "node_modules/sweetalert/dev/sweetalert";
+
+// please-wait
+.pg-loading-logo {
+    width: 300px;
+}
+.pg-loading-screen .pg-loading-html p {
+  color: #FFF;
+  font-weight: 300;
+}
+
+// tables
+.action-column {
+    width: 60px;
+}

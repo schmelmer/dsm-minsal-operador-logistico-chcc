@@ -1,0 +1,38 @@
+<ui-view>
+
+    <div class='row'>
+        <article class="col-sm-12 col-md-12 col-lg-12">
+
+            <!-- año -->
+            <div class="jarviswidget jarviswidget-color-blueDark" id="agno-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-calendar-o"></i> </span>
+                    <h2>Año actual</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+                        <span class="badge bg-color-darken">{{ vm.agno }}</span>
+
+                        <a ui-sref="app.configuracion.edit" class="btn btn-warning btn-xs"><i class='fa fa-pencil'></i> Cambiar año</a>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- empresa distrubuidora actual -->
+            <div class="jarviswidget jarviswidget-color-blueDark" id="agno-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-ship"></i> </span>
+                    <h2>Empresa distribuidora actual</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</ui-view>

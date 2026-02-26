@@ -1,0 +1,94 @@
+<ui-view>
+    <div class='row'>
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class='pull-right'>
+				<a class="btn btn-success" href="/puntoEntrega/xls"><span><i class='fa fa-file-excel-o'></i> Exportar a excel</span></a>
+                <a ui-sref='app.puntosEntrega.create' ng-hide="vm.hasRole('admin')" class='btn btn-primary'><i class='fa fa-plus'></i> Nuevo punto de entrega</a>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class='row'>
+        <article class="col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget jarviswidget-color-blueDark" id="puntosEntrega-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                    <h2>Listado de puntos de entrega</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+                        <div class="table-responsive">
+                            <table class='table table-bordered'>
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Responsable</th>
+                                        <th>Region</th>
+                                        <th>Servicio</th>
+                                        <th>Comuna</th>
+                                        <th>Establecimiento</th>
+                                        <th>Fecha creación</th>
+                                        <th ng-hide="vm.hasRole('admin')" style="width:115px">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <ui-select ng-model="vm.search.tipo" on-select="vm.filter()">
+                                                <ui-select-match placeholder="Selecciona">
+                                                    {{$select.selected.name}}
+                                                </ui-select-match>
+                                                <ui-select-choices repeat="territorio.type as territorio in vm.territorios">
+                                                    <span ng-bind="territorio.name"></span>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </td>
+                                        <td> <input ng-model="vm.search.responsable" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Ej. juan"></input> </td>
+                                        <td> <input ng-model="vm.search.region" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Ej. arica"></input> </td>
+                                        <td> <input ng-model="vm.search.servicio" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Ej. aisen"></input> </td>
+                                        <td> <input ng-model="vm.search.comuna" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Ej. lanco"></input> </td>
+                                        <td> <input ng-model="vm.search.establecimiento" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Ej. CES"></input> </td>
+                                        <td></td>
+                                        <td ng-hide="vm.hasRole('admin')"></td>
+                                    </tr>
+                                    <tr ng-repeat="puntoEntrega in vm.puntosEntrega" ng-hide="vm.reload">
+                                        <td>{{ (vm.territorios | filter:{type: puntoEntrega.territorio_type})[0].name }} </td>
+                                        <td>
+                                            <a ui-sref="app.users.show({id: puntoEntrega.responsable.id})">{{ ::puntoEntrega.responsable.name }}</a>
+                                        </td>
+                                        <td>{{ ::puntoEntrega.region.name }}</td>
+                                        <td>{{ ::puntoEntrega.servicio.name }}</td>
+                                        <td>{{ ::puntoEntrega.comuna.name }}</td>
+                                        <td>{{ ::puntoEntrega.establecimiento.name }}</td>
+                                        <td>{{ ::puntoEntrega.diff }} ({{ ::puntoEntrega.created_at}})</td>
+                                        <td ng-hide="vm.hasRole('admin')">
+                                            <a ui-sref="app.puntosEntrega.estimaciones({id: puntoEntrega.id})" class="btn btn-primary btn-xs"><i class='fa fa-calculator'></i></a>
+                                            <a ui-sref="app.puntosEntrega.edit({id: puntoEntrega.id})" class="btn btn-warning btn-xs"><i class='fa fa-pencil'></i></a>
+                                            <a ng-click="vm.destroy(puntoEntrega.id, $index)" class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div ng-if='vm.reload' class='text-center'>
+                            <i class="fa fa-2x fa-spinner fa-spin"></i>
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="vm.puntosEntrega | isEmpty" class='text-center'>
+                            Sin resultados
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="! (vm.puntosEntrega | isEmpty)" class='text-center'>
+                            <ul uib-pagination items-per-page="vm.itemsPerPage" max-size="10" boundary-link-numbers="true" rotate="false" force-ellipses="true" total-items="vm.totalItems" ng-model="vm.page" ng-change="vm.filter(vm.page)"></ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</ui-view>

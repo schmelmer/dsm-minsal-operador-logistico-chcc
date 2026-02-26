@@ -1,0 +1,161 @@
+<ui-view>
+    <div class='row'>
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class='pull-right'>
+				<a class="btn btn-success" href="/pedidos/xls"><span><i class='fa fa-file-excel-o'></i> Exportar a excel</span></a>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class='row'>
+
+        <article class="col-sm-12 col-md-12 col-lg-12">
+
+            <!-- pedidos -->
+            <div class="jarviswidget jarviswidget-color-blueDark" id="pedidos-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-truck"></i> </span>
+                    <h2>Pedidos</h2>
+                </header>
+
+                    <div class="widget-body">
+
+                        <!-- detalle pedidos -->
+                        <table class='table table-bordered'>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Año</th>
+                                    <th>Punto Entrega</th>
+                                    <th>Servicio</th>
+                                    <th>Comuna</th>
+                                    <th>Establecimiento</th>
+                                    <th>Fecha pedido</th>
+                                    <th>Estado</th>
+                                    <th>Evaluación</th>
+                                    <th ng-hide="vm.hasRole('admin')" style="width:150px">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td> <input ng-model="vm.search.id" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="ID"></input> </td>
+                                    <td> <input ng-model="vm.search.agno" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Año"></input> </td>
+                                    <td> <input ng-model="vm.search.punto" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Punto entrega"></input> </td>
+                                    <td> <input ng-model="vm.search.servicio" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Servicio"></input> </td>
+                                    <td> <input ng-model="vm.search.comuna" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Comuna"></input> </td>
+                                    <td> <input ng-model="vm.search.establecimiento" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="Establecimiento"></input> </td>
+                                    <td> </td>
+                                    <td>
+                                        <ui-select ng-model="vm.search.estado" on-select="vm.filter()">
+                                            <ui-select-match placeholder="Selecciona">
+                                                {{$select.selected.value}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="opcion.id as opcion in [{id: 'solicitud_realizada', value: 'Solicitud realizada'}, {id: 'en_transito', value: 'En transito'}, {id: 'en_punto_destino', value: 'En punto destino'}, {id: '', value: 'Todos'}]">
+                                                <span ng-bind="opcion.value"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </td>
+                                    <td>
+                                        <ui-select ng-model="vm.search.evaluacion" on-select="vm.filter()">
+                                            <ui-select-match placeholder="Selecciona">
+                                                {{$select.selected}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="opcion as opcion in [1, 2, 3, 4, 5 ,6, 7]">
+                                                <span ng-bind="opcion"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </td>
+                                    <td> </td>
+                                </tr>
+                                <tr ng-repeat="pedido in vm.pedidos track by $index">
+                                    <td>{{ ::pedido.id }}</td>
+                                    <td>{{ ::pedido.agno }}</td>
+                                    <td>{{ ::pedido.puntoentrega.tipo}}</td>
+                                    <td>{{ ::pedido.puntoentrega.servicio.name}}</td>
+                                    <td>{{ ::pedido.puntoentrega.comuna.name}}</td>
+                                    <td>{{ ::pedido.puntoentrega.establecimiento.name}}</td>
+                                    <td>{{ ::vm.formatDate(pedido.created_at) | date:'dd/MM/yyyy' }} ({{ ::pedido.diff }})</td>
+                                    <td>
+                                        <span class="label label-{{ vm.classEstados[pedido.estado]}}">{{ ::pedido.estado.split('_').join(" ") }}</span>
+                                    </td>
+                                    <td>
+                                        <div ng-if="pedido.estado=='en_punto_destino'">
+                                        <span ng-if="pedido.evaluacion" > <i class='fa' ng-class="{'fa-thumbs-o-up': pedido.evaluacion >=4, 'fa-thumbs-o-down': pedido.evaluacion < 4}"></i> {{ ::pedido.evaluacion }}</span>
+                                        <button ng-if="pedido.evaluacion_observacion"  data-toggle="tooltip" data-placement="bottom" title="{{ pedido.evaluacion_observacion}}" class="btn btn-xs bg-color-purple txt-color-white">
+                                            <i class="fa fa-comment"></i> <span class="caret"> </span>
+                                        </button>
+                                    </div>
+                                    </td>
+                                    <td>
+
+                                        <a ng-click="vm.historial($index)" class='btn btn-primary btn-xs' title="ver historial"> <i class='fa fa-folder-open'></i></a>
+                                        <a ng-click="vm.detalle($index)" class='btn btn-info btn-xs' title="ver detalle"> <i class='fa fa-cart-arrow-down '></i></a>
+                                        <a ui-sref="app.pedidos.edit({id: pedido.id})" ng-hide="vm.hasRole('admin')" class="btn btn-warning btn-xs"><i class='fa fa-pencil'></i></a>
+                                        <a ng-if="pedido.estado=='en_punto_destino'" class='btn btn-primary btn-xs' href="/guias/{{pedido.guia}}" title="Descargar guia de despacho" target="_blank"><i class='fa fa-cloud-download'></i></a>
+                                        <a ng-if="pedido.observacion_distribuidor" ng-click="vm.observacionDistribuidor(pedido)" class='btn  bg-color-blueDark txt-color-white btn-xs' title="ver observacion distribuidor"> <i class='fa fa-exclamation-triangle'></i></a>
+
+                                        <!-- detalle -->
+                                        <div id="detalle_{{$index}}" ng-hide="true">
+                                            <table class='table table-bordered' style="height: 500px; overflow-y: scroll; display: block">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Producto</th>
+                                                        <th>Cajas</th>
+                                                        <th>Unidades</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="detalle in pedido.detalle">
+                                                        <td>{{ ::vm.productoNombreDetalle(detalle) }}</td>
+                                                        <td>
+                                                            <span class="badge bg-color-greenLight"> {{ ::detalle.cantidad}} </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-color-darken"> {{ ::vm.productoCajasDetalle(detalle) }} </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- historial -->
+                                        <div id="historial_{{$index}}" ng-hide="true">
+                                            <table class='table table-bordered'>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Estado</th>
+                                                        <th>Fecha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="historial in pedido.historial | orderBy:'-'">
+                                                        <td>{{ ::historial.estado.split('_').join(" ") }}</td>
+                                                        <td>{{ ::vm.formatDate(historial.fecha) | date:'dd/MM/yyyy' }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div ng-if='vm.reload' class='text-center'>
+                            <i class="fa fa-2x fa-spinner fa-spin"></i>
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="vm.pedidos | isEmpty" class='text-center'>
+                            Sin resultados
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="! (vm.pedidos | isEmpty)" class='text-center'>
+                            <ul uib-pagination items-per-page="vm.itemsPerPage" max-size="10" boundary-link-numbers="true" rotate="false" force-ellipses="true" total-items="vm.totalItems" ng-model="vm.page" ng-change="vm.filter(vm.page)"></ul>
+                        </div>
+                    </div>
+
+            </div>
+        </article>
+    </div>
+</ui-view>

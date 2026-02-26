@@ -1,0 +1,36 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-calculator"></i> </span>
+                <h2>Estimaciones de {{ vm.producto.name }}</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <form class="form-horizontal" role="form" method="POST" novalidate>
+
+                        <div class="form-group" ng-repeat="estimacion in vm.estimaciones">
+                            <label class="col-md-4 control-label">{{ estimacion.punto }}</label>
+
+                            <div class="col-md-3">
+								<div class="input-group">
+									<input type="number" min="0" class="form-control" ng-model="estimacion.cajas_manuales" />
+									<span class="input-group-addon"><i class="fa fa-cubes"></i></span>
+								</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-click="vm.submitForm()" class="btn btn-primary">
+                                    <i ng-class="{'fa-calculator': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> Asignar estimación
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

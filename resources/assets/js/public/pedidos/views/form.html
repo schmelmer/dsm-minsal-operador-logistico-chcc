@@ -1,0 +1,136 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa" ng-class="{'fa-plus': vm.action == 'Crear', 'fa-edit': vm.action == 'Editar'}"></i> </span>
+                <h2>{{ vm.action }} pedido</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+
+                    <!-- seleccionar punto de entrega -->
+                    <form >
+                        <fieldset ng-disabled="vm.puntosEntrega.length == 1">
+                            <legend>Punto de entrega</legend>
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Punto de entrega</label>
+
+                                <div class="col-md-6">
+                                    <ui-select ng-model="vm.puntoEntrega" ng-change="vm.cargaEstimaciones()">
+                                        <ui-select-match placeholder="Seleccione punto de entrega...">
+                                            {{$select.selected.direccion}} - {{$select.selected.tipo}}
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="punto as punto in (vm.puntosEntrega | filter: $select.search) track by $index">
+                                            <span ng-bind="punto.direccion"></span> - <span ng-bind="punto.tipo"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+
+                                    <p class="note" ng-show="vm.loadingEstimaciones">
+                                        <i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                        Cargando valores ...
+                                    </p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+
+                    <!-- <pre> -->
+                    <!--     <code>{{ vm.productos | json }}</code> -->
+                    <!-- </pre> -->
+
+                    <!-- solicitar productos -->
+                    <form ng-if="vm.data.puntoEntregaId" ng-hide="vm.loadingEstimaciones" class="form-horizontal" role="form" method="POST" name='vm.form' novalidate>
+
+                        <fieldset ng-disabled="vm.loadingEstablecimientos">
+                            <legend>Materiales a solicitar</legend>
+
+							<div class="alert alert-block alert-warning">
+                                <a class="close" data-dismiss="alert" href="javascript:void(0);">×</a>
+                                <h4 class="alert-heading">Importante!</h4>
+								En caso que no desee solicitar un producto digite "0" en la cantidad.
+                            </div>
+
+                            <!-- productos  a solicitar-->
+                            <div class="form-group" ng-repeat="producto in vm.productos  | filtroProductosDeServicio:vm.puntoEntrega  | filtroProductosDeHospitales:vm.puntoEntrega | orderBy: 'id' track by $index">
+                                <label class="col-md-4 control-label">{{ producto.name }}</label>
+
+                                <!-- cantidad a pedir -->
+                                <div class="col-md-6" ng-class="{'has-error': vm.hasError('productos.' + $index + '.cantidad')}">
+                                    <ng-form name="cantidadForm">
+                                        <input ng-model="producto.cantidad" name='cantidad' ng-min="0" ng-step="1" step="1" ng-max="vm.cajasDisponibles(producto.id)" class='form-control' type="number" required/>
+
+                                        <!-- errores -->
+                                        <div ng-messages="cantidadForm.cantidad.$error" ng-show="cantidadForm.cantidad.$dirty && cantidadForm.cantidad.$invalid" class='has-error'>
+                                            <span ng-message="number" class='help-block text-danger'>Ingrese una cantidad valida (número)</span>
+                                            <span ng-message="step" class='help-block text-danger'>Cantidad debe ser un numero entero y sin comas ni punto</span>
+                                            <span ng-message="min" class='help-block text-danger'>Cantidad no puede ser menor a 0</span>
+                                            <span ng-message="max" class='help-block text-danger'>Cantidad no puede ser mayor a la cantidad anual total ({{vm.cajasDisponibles(producto.id)}} )</span>
+                                            <span ng-message="required" class='help-block'>Ingrese cantidad de cajas del producto</span>
+                                        </div>
+                                    </ng-form>
+
+                                    <!-- errores servidor -->
+                                    <span ng-if="vm.hasError('productos.' + $index + '.cantidad')" class="help-block">
+                                        <strong>{{ vm.errors['productos.' + $index + '.cantidad'][0]}}</strong>
+                                    </span>
+
+                                    <!-- estimaciones -->
+                                    <p>
+                                        <i class="fa fa-cubes"></i> Cantidad de cajas sugeridas por periodicidad: {{ vm.calculaCajasPeriodo(vm.estimaciones[producto.id]) }}
+                                        <br>
+                                        <i class="fa fa-shopping-cart"></i> Total de cajas tiene disponible aún ud: {{ vm.cajasDisponibles(producto.id)  }}
+                                        <br>
+                                        <span ng-if="producto.cantidad != null"><i  class="fa fa-shopping-cart"></i> Total de unidades que representa la cantidad de cajas: {{ producto.cantidad * producto.cajas }}</span>
+                                    </p>
+
+                                </div>
+                            </div>
+
+                            <!-- observacion -->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Observaciones</label>
+                                <div class="col-md-6">
+                                    <textarea ng-model="vm.data.observacion" class='form-control' placeholder="Ingrese observaciones en relación al pedido, ya sea indicaciones u otro"></textarea>
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-disabled="vm.form.$invalid" ng-click="vm.confirmarPedido()" class="btn btn-primary">
+                                    <i ng-class="{'fa-truck': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> {{ vm.action }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-hide="true" id="pedido">
+        <table class='table table-bordered' style="height: 500px; overflow-y: scroll; display: block">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cajas</th>
+                    <th>Unidades</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="producto in vm.productos | filtroProductosDeServicio:vm.puntoEntrega | filtroProductosDeHospitales:vm.puntoEntrega ">
+                    <td>{{ ::producto.name }}</td>
+                    <td>
+                        <span class="badge bg-color-greenLight"> {{ producto.cantidad}} </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-color-darken"> {{ producto.cantidad * producto.cajas}} </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

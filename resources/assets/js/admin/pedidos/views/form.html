@@ -1,0 +1,93 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa" ng-class="{'fa-plus': vm.action == 'Crear', 'fa-edit': vm.action == 'Editar'}"></i> </span>
+                <h2>{{ vm.action }} pedido</h2>
+            </header>
+
+            <div class="widget-body">
+
+                <!-- punto entrega -->
+                <div>
+                    <fieldset>
+                        <legend>Punto de entrega</legend>
+                    </fieldset>
+
+                    <!-- punto -->
+                    <div class="form-group">
+                        <label>Punto de entrega</label>
+
+                        <ui-select ng-model="vm.data.punto_entrega_id">
+                            <ui-select-match placeholder="Seleccione punto entrega">{{$select.selected.tipo }}</ui-select-match>
+                            <ui-select-choices repeat="punto.id as punto in (vm.puntosEntrega | filter: $select.search) track by $index">
+                                <div ng-bind-html="punto.tipo | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+
+                    <!-- estado -->
+                    <div class="form-group">
+                        <label>Estado</label>
+
+                        <ui-select ng-model="vm.data.estado">
+                            <ui-select-match placeholder="Seleccione estado">{{$select.selected.name }}</ui-select-match>
+                            <ui-select-choices repeat="estado.label as estado in (vm.estados | filter: $select.search) track by $index">
+                                <div ng-bind-html="estado.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+
+                    <!-- solicitar productos -->
+                    <form  class="form-horizontal"  novalidate>
+
+                        <fieldset>
+                            <legend>Materiales solicitados</legend>
+
+                            <!-- productos  a solicitar-->
+                            <div class="form-group" ng-repeat="producto in vm.productos track by $index">
+                                <label class="col-md-4 control-label">{{ producto.name }}</label>
+
+                                <!-- cantidad a pedir -->
+                                <div class="col-md-6" ng-class="{'has-error': vm.hasError('productos.' + $index + '.cantidad')}">
+                                    <input ng-model="producto.cantidad" ng-init="producto.cantidad=vm.getCantidad(producto)" name='cantidad' class='form-control' type="number" />
+
+                                    <!-- errores servidor -->
+                                    <span ng-if="vm.hasError('productos.' + $index + '.cantidad')" class="help-block">
+                                        <strong>{{ vm.errors['productos.' + $index + '.cantidad'][0]}}</strong>
+                                    </span>
+
+                                    <!-- estimaciones -->
+                                    <!-- <p> -->
+                                        <!--     Cantidad de unidades sugeridad por periodicidad: {{ vm.estimaciones[producto.id].valor }} -->
+                                        <!--     <br> -->
+                                        <!--     Total de unidades que tiene disponible aún: {{ vm.estimaciones[producto.id].total - vm.cantidadPedidosProductos[producto.id] }} -->
+                                        <!--     <br> -->
+                                        <!--     Total de cajas que representa la cantidad de unidades: - -->
+                                        <!-- </p> -->
+
+                                </div>
+                            </div>
+
+                            <!-- observacion -->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Observaciones</label>
+                                <div class="col-md-6">
+                                    <textarea ng-model="vm.data.observacion" class='form-control' placeholder="Ingrese observaciones en relación al pedido, ya sea indicaciones u otro"></textarea>
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-disabled="vm.form.$invalid" ng-click="vm.submitForm()" class="btn btn-primary">
+                                    <i ng-class="{'fa-truck': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> {{ vm.action }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

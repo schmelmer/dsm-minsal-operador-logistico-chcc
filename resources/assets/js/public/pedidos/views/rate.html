@@ -1,0 +1,69 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-thumbs-o-up"></i> </span>
+                <h2>Evaluar pedido</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+
+                    <form  name='form' class="form-horizontal" role="form" method="POST" name='vm.form' novalidate>
+
+                        <fieldset>
+                            <legend>Valoración del pedido</legend>
+
+                            <!-- productos  a solicitar-->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Puntuación del pedido</label>
+
+                                <!-- cantidad a pedir -->
+                                <div class="col-md-6" ng-class="{'has-error': vm.hasError('rate')}">
+                                    <div class='row'>
+                                        <div class='col-md-3'>
+                                            <input ng-model="vm.data.rate" name='rate' min="1" max="7" class='form-control' type="number" required placeholder="7"/>
+                                        </div>
+
+                                        <div class='col-md-8'>
+                                            Puede indicar cantidad de estrellas o nota
+                                            <input-stars max="7" ng-model="vm.data.rate"></input-stars>
+                                        </div>
+                                    </div>
+
+                                    <!-- errores -->
+                                    <div ng-messages="form.rate.$error" ng-show="form.rate.$dirty && form.rate.$invalid" class='has-error'>
+                                        <span ng-message="min" class='help-block text-danger'>El campo puntuación debe ser mayor a 0</span>
+                                        <span ng-message="max" class='help-block text-danger'>El campo puntuación no puede ser mayor 7</span>
+                                        <span ng-message="required" class='help-block'>Ingrese evaluación</span>
+                                    </div>
+
+                                    <span ng-if="vm.hasError('rate')" class="help-block">
+                                        <strong>{{ vm.errors['rate'][0]}}</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- observacion -->
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Observaciones</label>
+                                <div class="col-md-6">
+                                    <textarea ng-model="vm.data.observacion" class='form-control' placeholder="Ingrese observaciones"></textarea>
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-disabled="form.$invalid" ng-click="vm.submitForm()" class="btn btn-primary">
+                                    <i ng-class="{'fa-star': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

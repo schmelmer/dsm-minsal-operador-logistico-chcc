@@ -1,0 +1,87 @@
+<ui-view>
+    <div class='row'>
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class='pull-right'>
+                <!-- <a ui-sref='app.estimaciones.create' class='btn btn-primary'>Nueva Estimaciones</a> -->
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class='row'>
+        <article class="col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget jarviswidget-color-blueDark" id="users-table">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                    <h2>Listado de Estimaciones</h2>
+                </header>
+
+                <div>
+                    <div class="widget-body">
+                        <table class='table table-bordered'>
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Producto</th>
+                                    <th>Direccion</th>
+                                    <th>Numero</th>
+                                    <th>Población</th>
+                                    <th>Cajas</th>
+                                    <th ng-hide="vm.hasRole('admin')" class='action-column'>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <ui-select ng-model="vm.search.tipo" on-select="vm.filter()">
+                                            <ui-select-match placeholder="Selecciona">
+                                                {{$select.selected.name}}
+                                            </ui-select-match>
+                                            <ui-select-choices repeat="territorio.type as territorio in vm.territorios">
+                                                <span ng-bind="territorio.name"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </td>
+                                    <td> <input ng-model="vm.search.producto" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="producto"></input> </td>
+                                    <td> <input ng-model="vm.search.direccion" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="punto entrega(direccion)"></input> </td>
+                                    <td> <input ng-model="vm.search.numero" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="punto entrega(numero)"></input> </td>
+                                    <td> </td>
+                                    <td>
+                                        <!-- <input ng-model="vm.search.cajas_total" ng-blur="vm.filter()" ng-enter="vm.filter()" type="text" class="form-control" placeholder="total"></input> -->
+                                    </td>
+                                    <td ng-hide="vm.hasRole('admin')"></td>
+                                </tr>
+                                <tr ng-repeat="estimacion in vm.estimaciones" ng-hide="vm.reload">
+                                    <td>{{ (vm.territorios | filter:{type: estimacion.puntoentrega.territorio_type})[0].name }} </td>
+                                    <td>{{ ::estimacion.producto.name }}</td>
+                                    <td>{{ ::estimacion.puntoentrega.calle }}</td>
+                                    <td>{{ ::estimacion.puntoentrega.numero }}</td>
+                                    <td>{{ ::estimacion.producto.poblacion.name_with_year }}</td>
+                                    <td>{{ ::estimacion.cajas_total }}</td>
+                                    <td ng-hide="vm.hasRole('admin')">
+                                        <a ui-sref="app.estimaciones.edit({id: estimacion.id})" class="btn btn-warning btn-xs"><i class='fa fa-pencil'></i></a>
+                                        <a ng-click="vm.destroy(estimacion.id, $index)" class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div ng-if='vm.reload' class='text-center'>
+                            <i class="fa fa-2x fa-spinner fa-spin"></i>
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="vm.estimaciones | isEmpty" class='text-center'>
+                            Sin resultados
+                        </div>
+
+                        <div ng-hide="vm.reload" ng-if="! (vm.estimaciones | isEmpty)" class='text-center'>
+                            <ul uib-pagination items-per-page="vm.itemsPerPage" max-size="10" boundary-link-numbers="true" rotate="false" force-ellipses="true" total-items="vm.totalItems" ng-model="vm.search.page" ng-change="vm.filter()"></ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</ui-view>

@@ -1,0 +1,154 @@
+<div class='row'>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-blueDark" id="user-form">
+            <header>
+                <span class="widget-icon"> <i class="fa" ng-class="{'fa-plus': vm.action == 'Crear', 'fa-edit': vm.action == 'Editar'}"></i> </span>
+                <h2>{{ vm.action }} Producto</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <form class="form-horizontal" role="form" method="POST" novalidate>
+
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('name')}">
+                            <label class="col-md-4 control-label">Nombre</label>
+
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" ng-model="vm.data.name">
+
+                                <span ng-if="vm.hasError('name')" class="help-block">
+                                    <strong>{{ vm.errors.name[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- categori -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('categoria_id')}">
+                            <label class="col-md-4 control-label">Categoría</label>
+
+                            <div class="col-md-6">
+                                <ui-select ng-model="vm.data.categoria_id">
+                                    <ui-select-match placeholder="Seleccione categoria">{{$select.selected.name }}</ui-select-match>
+                                    <ui-select-choices repeat="categoria.id as categoria in (vm.categorias | filter: $select.search) track by $index">
+                                        <div ng-bind-html="categoria.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+
+                                <span ng-if="vm.hasError('categoria_id')" class="help-block">
+                                    <strong>{{ vm.errors.categoria_id[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- aplica solo a servicio -->
+                        <div class="form-group" ng-hide="vm.data.de_hospitales">
+                            <label class="col-md-4 control-label">Aplica solo a Servicio de Salud y SEREMI de Salud</label>
+
+                            <div class="col-md-6">
+                                 <input ng-model="vm.data.de_servicios" type="checkbox" class="form-control" ng-click="vm.data.excluye_hospitales_secundarios = false">
+                            </div>
+                        </div>
+
+                        <!-- aplica solo a hospital -->
+                        <div class="form-group" ng-hide="vm.data.de_servicios">
+                            <label class="col-md-4 control-label">Aplica solo a Hospital</label>
+
+                            <div class="col-md-6">
+                                 <input ng-model="vm.data.de_hospitales" type="checkbox" class="form-control" ng-click="vm.data.excluye_hospitales_secundarios = false">
+                            </div>
+                        </div>
+
+                        <!-- excluye hospitales secundarios -->
+                        <div class="form-group" ng-if="! vm.data.de_hospitales && ! vm.data.de_servicios">
+                            <label class="col-md-4 control-label">Excluye hospitales nivel secundario</label>
+
+                            <div class="col-md-6">
+                                 <input ng-model="vm.data.excluye_hospitales_secundarios" type="checkbox" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- año -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('year')}">
+                            <label class="col-md-4 control-label">Año</label>
+
+                            <div class="col-md-6">
+                                <select class="form-control" ng-options="year for year in vm.years" ng-model="vm.data.year"  ng-change='vm.changeYear()'>
+                                </select>
+
+                                <span ng-if="vm.hasError('year')" class="help-block">
+                                    <strong>{{ vm.errors.year[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- poblaciones -->
+                        <div ng-if="! (vm.data.de_servicios || vm.data.de_hospitales)" class="form-group" ng-class="{'has-error': vm.hasError('poblacion_id')}">
+                            <label class="col-md-4 control-label">Población</label>
+
+                            <div class="col-md-6">
+                                <ui-select ng-model="vm.data.poblacion_id" ng-disabled="! vm.data.year || vm.loadingPoblaciones">
+                                    <ui-select-match placeholder="No aplica">{{$select.selected.name }}</ui-select-match>
+                                    <ui-select-choices repeat="poblacion.id as poblacion in (vm.poblaciones | filter: $select.search) track by $index">
+                                        <div ng-bind-html="poblacion.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+
+                                <p class="note" ng-show="vm.loadingPoblaciones">
+                                    <i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                    Cargando poblaciones ...
+                                </p>
+
+                                <span ng-if="vm.hasError('poblacion_id')" class="help-block">
+                                    <strong>{{ vm.errors.poblacion_id[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- stock -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('stock')}">
+                            <label class="col-md-4 control-label">Stock</label>
+
+                            <div class="col-md-6">
+                                <input type="number" min="0" class="form-control" ng-model="vm.data.stock">
+
+                                <span ng-if="vm.hasError('stock')" class="help-block">
+                                    <strong>{{ vm.errors.stock[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- cajas -->
+                        <div class="form-group" ng-class="{'has-error': vm.hasError('cajas')}">
+                            <label class="col-md-4 control-label">Unidades por caja</label>
+
+                            <div class="col-md-6">
+                                <input type="number" min="0" class="form-control" ng-model="vm.data.cajas">
+
+                                <span ng-if="vm.hasError('cajas')" class="help-block">
+                                    <strong>{{ vm.errors.cajas[0] }}</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- estado -->
+                        <div class="form-group">
+                            <label class="col-md-4 control-label">Activo</label>
+
+                            <div class="col-md-6">
+                                 <input ng-model="vm.data.estado" type="checkbox" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-md-offset-4">
+                                <button ng-click="vm.submitForm()" class="btn btn-primary">
+                                    <i ng-class="{'fa-user': !vm.formIsSubmit, 'fa-spinner fa-spin': vm.formIsSubmit }" class="fa fa-btn "></i> {{ vm.action }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
